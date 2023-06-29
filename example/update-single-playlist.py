@@ -20,5 +20,4 @@ Playlist = Playlist(
 
 playlist_manager.update_tracks_in_playlist(playlist=Playlist)
 
-
 # if the playlist is does not exist it will list all the playlists available
