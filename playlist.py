@@ -32,15 +32,15 @@ class Playlist:
     """
 
     def __init__(self, playlist_url: str, playlist_name: str, artist_name: str, image_path=None, playlist_id=None, playlist_description=None):
+        self.tracks_uris = []
         self.url = playlist_url
         self.playlist_name = playlist_name
         self.artist_name = artist_name
-        self.image_path = convert_image_to_base64(image_path)
+        self.image_path = convert_image_to_base64(image_path) if image_path else None
         self.result = self.get_playlist_details()
-        self.description = playlist_description if playlist_description else f"This is {self.artist_name} playlist from Apple Music"
-        self.songs = self.result[0]
+        self.playlist_description = playlist_description if playlist_description else f"This is {self.artist_name} playlist from Apple Music"
+        self.playlist_tracks = self.result
         self.id = playlist_id
-        self.uris = []
 
     def get_playlist_details(self):
         """
@@ -53,7 +53,7 @@ class Playlist:
         soup = BeautifulSoup(response.text, "html.parser")
         artists = soup.find_all('div', class_='songs-list__song-link-wrapper')
         song_titles = soup.find_all(name="div", class_="songs-list-row__song-name svelte-17mxcgw")
-        song_titles = [song_title.text for song_title in song_titles]
+        song_titles = [song_title.text.replace("*", "i").replace("[", "").replace("]", "").replace("B. DâOR", "B. D'OR") for song_title in song_titles]
         for i in range(0, len(artists), 2):
             artist = artists[i].find_all('a')
             artist = ', '.join(a.text for a in artist)
@@ -62,4 +62,8 @@ class Playlist:
         # This loops through both songs and artists to create a list of dictionaries
         for song_title, artist in zip(song_titles, song_artists):
             songs_details.append({"title": song_title, "artist": artist})
-        return [songs_details]
+        for track in songs_details:
+            print(f'Song title: {track["title"]} \tSong by: {track["artist"]}')
+        print()
+
+        return songs_details
